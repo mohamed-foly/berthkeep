@@ -43,7 +43,7 @@ func listNative(names []string) ([]port.Process, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer windows.CloseHandle(snap)
+	defer func() { _ = windows.CloseHandle(snap) }()
 	var e windows.ProcessEntry32
 	e.Size = uint32(unsafe.Sizeof(e))
 	if err := windows.Process32First(snap, &e); err != nil {
@@ -70,7 +70,7 @@ func commandLine(pid uint32) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer windows.CloseHandle(h)
+	defer func() { _ = windows.CloseHandle(h) }()
 	size := uint32(4096)
 	for i := 0; i < 4; i++ {
 		buf := make([]byte, size)

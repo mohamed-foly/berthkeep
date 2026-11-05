@@ -16,7 +16,7 @@ import (
 
 func init() {
 	register("ui", "open the manager window (starts the service if needed)", runUI)
-	register("gui", "run the service with its window and tray in the foreground", runGUI)
+	register("gui", "run the service with window and tray in the foreground: gui [--tray]", runGUI)
 	register("quit", "stop the background service (browsers keep running)", runQuit)
 }
 
@@ -48,7 +48,7 @@ func runUI(e *Env, _ []string) error {
 		return err
 	}
 	cmd := exec.Command(exe, "--home", e.Home, "gui")
-	detach.Apply(cmd, true)
+	detach.Apply(cmd, false) // hiding would hide the first window too
 	if err := cmd.Start(); err != nil {
 		return err
 	}
@@ -57,10 +57,15 @@ func runUI(e *Env, _ []string) error {
 	return nil
 }
 
-func runGUI(e *Env, _ []string) error {
+func runGUI(e *Env, args []string) error {
+	fs := newFlags("gui", e)
+	tray := fs.Bool("tray", false, "start in the tray without a window")
+	if _, err := parseInterleaved(fs, args); err != nil {
+		return errUsage
+	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
-	return app.RunGUI(ctx, e.Home, Version)
+	return app.RunGUI(ctx, e.Home, Version, *tray)
 }
 
 func runQuit(e *Env, _ []string) error {

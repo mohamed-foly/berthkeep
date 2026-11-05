@@ -102,7 +102,7 @@ func (s *Server) events(w http.ResponseWriter, r *http.Request) {
 			}
 			fmt.Fprintf(w, "event: %s\ndata: ", e.Type)
 			b, _ := jsonMarshal(e.Data)
-			w.Write(b)
+			_, _ = w.Write(b)
 			fmt.Fprint(w, "\n\n")
 			fl.Flush()
 		}
@@ -490,7 +490,7 @@ func (s *Server) screenshot(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "image/jpeg")
 	w.Header().Set("Cache-Control", "no-store")
-	w.Write(img)
+	_, _ = w.Write(img) //nolint:gosec // JPEG bytes served as image/jpeg
 }
 
 func (s *Server) log(w http.ResponseWriter, r *http.Request) {
@@ -505,7 +505,7 @@ func (s *Server) log(w http.ResponseWriter, r *http.Request) {
 	}
 	tail := launcher.TailLog(filepath.Join(s.Home, "logs", sess.Slug+".log"), n)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.Write([]byte(tail))
+	_, _ = w.Write([]byte(tail))
 }
 
 func (s *Server) detect(w http.ResponseWriter, r *http.Request) {

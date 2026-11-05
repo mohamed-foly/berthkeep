@@ -69,13 +69,22 @@ func TestSecurityRules(t *testing.T) {
 	}
 	req, _ := http.NewRequest("GET", base+"/api/state", nil)
 	req.Host = "evil.test"
-	if r, err := http.DefaultClient.Do(req); err != nil || r.StatusCode != http.StatusMisdirectedRequest {
-		t.Fatalf("bad host: %v %v", r.StatusCode, err)
+	r, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r.Body.Close()
+	if r.StatusCode != http.StatusMisdirectedRequest {
+		t.Fatalf("bad host: %v", r.StatusCode)
 	}
 	req, _ = http.NewRequest("POST", base+"/api/sessions", strings.NewReader("title=x"))
 	req.Header.Set("Content-Type", "text/plain")
 	req.Header.Set(TokenHeader, s.Token)
-	if r, _ := http.DefaultClient.Do(req); r.StatusCode != http.StatusUnsupportedMediaType {
+	if r, err = http.DefaultClient.Do(req); err != nil {
+		t.Fatal(err)
+	}
+	r.Body.Close()
+	if r.StatusCode != http.StatusUnsupportedMediaType {
 		t.Fatalf("text/plain: %d", r.StatusCode)
 	}
 	if r, _ := call(t, s, "GET", base+"/api/sessions/x/endpoint?ensure=1", "", false); r.StatusCode != 403 {
@@ -99,7 +108,7 @@ func TestSessionCRUD(t *testing.T) {
 	if r.StatusCode != 201 {
 		t.Fatalf("create: %d %s", r.StatusCode, body)
 	}
-	r, body = call(t, s, "GET", base+"/api/state", "", false)
+	_, body = call(t, s, "GET", base+"/api/state", "", false)
 	var st struct {
 		Sessions []session.View `json:"sessions"`
 	}
@@ -115,7 +124,7 @@ func TestSessionCRUD(t *testing.T) {
 	if r, _ = call(t, s, "PATCH", base+"/api/sessions/shop-admin", `{"port":80}`, true); r.StatusCode != 400 {
 		t.Fatalf("bad port should be 400: %d", r.StatusCode)
 	}
-	if r, body = call(t, s, "GET", base+"/api/ports/check?port=19470", "", false); !strings.Contains(body, `"reservedBy":["shop-admin"]`) {
+	if _, body = call(t, s, "GET", base+"/api/ports/check?port=19470", "", false); !strings.Contains(body, `"reservedBy":["shop-admin"]`) {
 		t.Fatalf("ports check: %s", body)
 	}
 	if r, _ = call(t, s, "GET", base+"/api/sessions/nope", "", false); r.StatusCode != 404 {

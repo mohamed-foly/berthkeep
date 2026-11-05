@@ -96,7 +96,7 @@ func (s *Store) Update(fn func(*File) error) error {
 	if err != nil {
 		return err
 	}
-	defer lock.Unlock()
+	defer func() { _ = lock.Unlock() }()
 	f, err := s.Load()
 	if err != nil {
 		return err

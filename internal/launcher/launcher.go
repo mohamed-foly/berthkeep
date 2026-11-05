@@ -82,12 +82,31 @@ func (l *Launcher) Start(ctx context.Context, s Spec) (Started, error) {
 		}
 	}()
 	res, err := l.waitReady(ctx, s, cmd.Process.Pid, exited)
-	if err != nil {
+	if err == nil && s.Port != 0 {
+		err = l.confirmOwner(ctx, s, cmd.Process.Pid)
+	}
+	if err != nil && !errors.Is(err, ErrPortRace) {
 		if tail := TailLog(s.LogPath, 40); tail != "" {
 			err = fmt.Errorf("%w\n--- browser log ---\n%s", err, tail)
 		}
 	}
 	return res, err
+}
+
+// ErrPortRace means another browser won the port while ours started.
+var ErrPortRace = errors.New("port taken by another browser during start")
+
+// confirmOwner checks that the browser on the port is the one we started.
+func (l *Launcher) confirmOwner(ctx context.Context, s Spec, pid int) error {
+	owner, err := cdp.BrowserPID(ctx, s.Port)
+	if err != nil || owner == pid {
+		return nil // can't tell (e.g. Electron), or it's ours
+	}
+	if m, ok, err := l.matchProcess(ctx, s.ProfileDir); err == nil && ok && m.PID == owner {
+		return nil // Chrome handed off to our profile's existing browser
+	}
+	_ = killTree(pid) // ours runs without CDP; don't leave it behind
+	return fmt.Errorf("%w (port %d, held by pid %d)", ErrPortRace, s.Port, owner)
 }
 
 func (l *Launcher) waitReady(ctx context.Context, s Spec, pid int, exited <-chan error) (Started, error) {

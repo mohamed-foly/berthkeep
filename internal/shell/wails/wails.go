@@ -35,6 +35,7 @@ type Options struct {
 	Svc  func() *session.Service
 	Hub  *events.Hub
 	Quit func() // stops the service
+	Tray bool   // start without a window
 }
 
 // Shell owns the Wails app.
@@ -82,9 +83,11 @@ func (s *Shell) Run(ctx context.Context) error {
 		<-ctx.Done()
 		s.app.Quit()
 	}()
-	s.mu.Lock()
-	s.showWindow() // before Run: no main-thread dispatch yet
-	s.mu.Unlock()
+	if !s.o.Tray {
+		s.mu.Lock()
+		s.showWindow() // before Run: no main-thread dispatch yet
+		s.mu.Unlock()
+	}
 	err := s.app.Run()
 	if s.o.Quit != nil {
 		s.o.Quit()

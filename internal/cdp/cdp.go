@@ -109,7 +109,10 @@ type response struct {
 
 // Dial connects to a CDP WebSocket URL.
 func Dial(ctx context.Context, wsURL string) (*Conn, error) {
-	ws, _, err := websocket.Dial(ctx, wsURL, &websocket.DialOptions{HTTPHeader: http.Header{}})
+	ws, resp, err := websocket.Dial(ctx, wsURL, &websocket.DialOptions{HTTPHeader: http.Header{}})
+	if resp != nil && resp.Body != nil {
+		_ = resp.Body.Close()
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -287,4 +290,23 @@ func Screenshot(ctx context.Context, port int, targetID string, quality int) ([]
 	}
 	err = c.Call(ctx, "Page.captureScreenshot", map[string]any{"format": "jpeg", "quality": quality}, &res)
 	return res.Data, err
+}
+
+// BrowserPID returns the browser process id behind the port.
+func BrowserPID(ctx context.Context, port int) (int, error) {
+	var res struct {
+		ProcessInfo []struct {
+			Type string `json:"type"`
+			ID   int    `json:"id"`
+		} `json:"processInfo"`
+	}
+	if err := browserCall(ctx, port, "SystemInfo.getProcessInfo", nil, &res); err != nil {
+		return 0, err
+	}
+	for _, p := range res.ProcessInfo {
+		if p.Type == "browser" {
+			return p.ID, nil
+		}
+	}
+	return 0, errors.New("no browser process reported")
 }

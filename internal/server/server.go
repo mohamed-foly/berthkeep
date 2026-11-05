@@ -183,7 +183,7 @@ func (s *Server) serveIndex(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'")
-	w.Write([]byte(strings.ReplaceAll(string(b), "{{TOKEN}}", s.Token)))
+	_, _ = w.Write([]byte(strings.ReplaceAll(string(b), "{{TOKEN}}", s.Token)))
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

@@ -4,6 +4,7 @@ package launcher
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/http"
 	"os/exec"
@@ -140,5 +141,28 @@ func TestPortTakenByOtherProcess(t *testing.T) {
 	s := l.Status(context.Background(), Probe{Port: p, ProfileDir: t.TempDir()})
 	if s.State != PortTaken {
 		t.Fatalf("status: %+v", s)
+	}
+}
+
+func TestPortRaceDetected(t *testing.T) {
+	l, exe := setup(t)
+	ctx := context.Background()
+	p := freePort(t)
+	other := exec.Command(exe, "--user-data-dir="+t.TempDir(), "--remote-debugging-port="+strconv.Itoa(p), "--headless=new", "--no-first-run", "about:blank")
+	if err := other.Start(); err != nil {
+		t.Fatal(err)
+	}
+	go other.Wait()
+	defer killTree(other.Process.Pid)
+	for deadline := time.Now().Add(15 * time.Second); !ports.IsListening(p) && time.Now().Before(deadline); {
+		time.Sleep(100 * time.Millisecond)
+	}
+	dir := t.TempDir()
+	_, err := l.Start(ctx, Spec{Exe: exe, ProfileDir: dir, Port: p, Headless: true})
+	if !errors.Is(err, ErrPortRace) {
+		t.Fatalf("want ErrPortRace, got %v", err)
+	}
+	if !l.waitGone(ctx, 0, dir, 5*time.Second) {
+		t.Fatal("losing browser left running")
 	}
 }

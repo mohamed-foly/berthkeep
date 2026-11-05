@@ -332,6 +332,16 @@ func (s *Service) start(ctx context.Context, sess domain.Session, o startOpts) (
 		spec.Width, spec.Height = s.Config.Defaults.Window.Width, s.Config.Defaults.Window.Height
 	}
 	started, err := s.Launcher.Start(ctx, spec)
+	for tries := 0; errors.Is(err, launcher.ErrPortRace) && sess.FixedPort() == 0 && tries < 3; tries++ {
+		// Lost an auto port to another starter: take the next free one.
+		if spec.Port, err = s.pickPort(sess, 0, spec.Port); err != nil {
+			break
+		}
+		started, err = s.Launcher.Start(ctx, spec)
+	}
+	if errors.Is(err, launcher.ErrPortRace) {
+		return sess, st, fmt.Errorf("%s: %v: %w", sess.Slug, err, domain.ErrConflict)
+	}
 	if err != nil {
 		return sess, st, fmt.Errorf("%s: %w: %v", sess.Slug, ErrStartFailed, err)
 	}
@@ -369,7 +379,7 @@ func (s *Service) executable(sess domain.Session) (string, error) {
 	return b.Path, nil
 }
 
-func (s *Service) pickPort(sess domain.Session, hint int) (int, error) {
+func (s *Service) pickPort(sess domain.Session, hint int, skip ...int) (int, error) {
 	free := s.PortFree
 	if free == nil {
 		free = ports.IsFree
@@ -381,6 +391,9 @@ func (s *Service) pickPort(sess domain.Session, hint int) (int, error) {
 		return p, nil
 	}
 	reserved := map[int]bool{s.Config.Server.Port: true}
+	for _, p := range skip {
+		reserved[p] = true
+	}
 	for _, p := range s.Config.Ports.Reserved {
 		reserved[p] = true
 	}

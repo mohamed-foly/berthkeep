@@ -22,7 +22,7 @@ import (
 const EnvShell = "BERTHKEEP_SHELL"
 
 // RunGUI runs the service plus a UI shell. Call it on the main goroutine.
-func RunGUI(ctx context.Context, home, version string) error {
+func RunGUI(ctx context.Context, home, version string, trayOnly bool) error {
 	debug.SetGCPercent(50) // long-lived tray process: keep the heap small
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -40,7 +40,7 @@ func RunGUI(ctx context.Context, home, version string) error {
 	useWails := wails.Available && (choice == "" || choice == "wails")
 	var native *wails.Shell
 	if useWails {
-		native = wails.New(wails.Options{Home: home, URL: url, Svc: svc, Quit: cancel})
+		native = wails.New(wails.Options{Home: home, URL: url, Svc: svc, Quit: cancel, Tray: trayOnly})
 	}
 
 	errc := make(chan error, 1)
@@ -72,6 +72,9 @@ func RunGUI(ctx context.Context, home, version string) error {
 			return err
 		}
 		cancel()
+		return <-errc
+	}
+	if trayOnly {
 		return <-errc
 	}
 	if err := current().OpenUI(); err != nil {

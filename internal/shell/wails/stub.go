@@ -21,6 +21,7 @@ type Options struct {
 	Svc  func() *session.Service
 	Hub  *events.Hub
 	Quit func()
+	Tray bool
 }
 
 // Shell is a placeholder.

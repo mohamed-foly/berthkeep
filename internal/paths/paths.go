@@ -32,7 +32,7 @@ type HomeInput struct {
 	Exists func(dir string) bool
 }
 
-// ResolveHome: --home, env, <exe-dir>/data, per-user dir.
+// ResolveHome picks --home, the env var, <exe-dir>/data, then the per-user dir.
 func ResolveHome(in HomeInput) (string, error) {
 	if in.Flag != "" {
 		return filepath.Abs(in.Flag)

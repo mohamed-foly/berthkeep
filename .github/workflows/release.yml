@@ -1,0 +1,56 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - { runner: windows-latest, os: windows, arch: amd64, variant: gui }
+          - { runner: windows-latest, os: windows, arch: arm64, variant: gui }
+          - { runner: ubuntu-24.04, os: linux, arch: amd64, variant: gui }
+          - { runner: ubuntu-24.04-arm, os: linux, arch: arm64, variant: gui }
+          - { runner: ubuntu-latest, os: linux, arch: amd64, variant: server }
+          - { runner: ubuntu-latest, os: linux, arch: arm64, variant: server }
+          - { runner: macos-latest, os: darwin, arch: arm64, variant: gui }
+          - { runner: macos-13, os: darwin, arch: amd64, variant: gui }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: GUI libraries (Linux)
+        if: matrix.os == 'linux' && matrix.variant == 'gui'
+        run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev pkg-config
+      - name: Build
+        run: go run ./tools/build -os ${{ matrix.os }} -arch ${{ matrix.arch }} -variant ${{ matrix.variant }} -version ${{ github.ref_name }} -out dist
+      # Windows code signing (SignPath Foundation) goes here once the project is approved.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.variant }}
+          path: dist/*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: parts
+      - name: Collect archives and checksums
+        run: |
+          mkdir dist
+          find parts -type f ! -name checksums.txt -exec cp {} dist/ \;
+          cat parts/*/checksums.txt | sort -k2 > dist/checksums.txt
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" dist/* --repo "${{ github.repository }}" --title "${{ github.ref_name }}" --generate-notes

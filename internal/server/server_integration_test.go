@@ -38,7 +38,7 @@ func TestStartTabsScreenshotAndWatcher(t *testing.T) {
 	if r.StatusCode != 200 || r.Header.Get("Content-Type") != "image/jpeg" || !strings.HasPrefix(img, "\xff\xd8") {
 		t.Fatalf("screenshot: %d %s len=%d", r.StatusCode, r.Header.Get("Content-Type"), len(img))
 	}
-	if r, body = call(t, s, "GET", base+"/api/sessions/peek/endpoint", "", false); !strings.Contains(body, `"ws":"ws://127.0.0.1:`) {
+	if _, body = call(t, s, "GET", base+"/api/sessions/peek/endpoint", "", false); !strings.Contains(body, `"ws":"ws://127.0.0.1:`) {
 		t.Fatalf("endpoint: %s", body)
 	}
 

@@ -6,7 +6,9 @@ import (
 	"context"
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -253,5 +255,35 @@ func TestAdoptDefaultProfileRefused(t *testing.T) {
 	_, err := svc.Create(ctx(), CreateInput{Title: "mine", AdoptDir: b.DefaultUserDataDir})
 	if !errors.Is(err, domain.ErrInvalid) || !strings.Contains(err.Error(), "Chrome 136") {
 		t.Fatalf("want refusal, got %v", err)
+	}
+}
+
+func TestAutoPortRaceRetries(t *testing.T) {
+	svc := newSvc(t)
+	p, err := ports.Allocate(19280, 19299, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exe := svc.Browsers.Browsers()[0].Path
+	other := exec.Command(exe, "--user-data-dir="+t.TempDir(), "--remote-debugging-port="+strconv.Itoa(p), "--headless=new", "--no-first-run", "about:blank")
+	if err := other.Start(); err != nil {
+		t.Fatal(err)
+	}
+	go other.Wait()
+	defer other.Process.Kill()
+	for deadline := time.Now().Add(15 * time.Second); !ports.IsListening(p) && time.Now().Before(deadline); {
+		time.Sleep(100 * time.Millisecond)
+	}
+	svc.Config.Ports.RangeStart, svc.Config.Ports.RangeEnd = p, p+5
+	svc.PortFree = func(int) bool { return true } // simulate both starters seeing the port free
+	s, err := svc.Create(ctx(), CreateInput{Title: "racer", Persistence: "ephemeral", Start: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s.Runtime.Port == p {
+		t.Fatalf("recorded the other browser's port %d", p)
+	}
+	if st := svc.Status(ctx(), s); st.State != launcher.Running || st.Tier != 1 {
+		t.Fatalf("status after retry: %+v", st)
 	}
 }

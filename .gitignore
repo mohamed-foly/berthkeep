@@ -22,6 +22,7 @@ context.md
 *.dylib
 /berthkeep
 /bkeep
+/berthkeepw
 /berthkeep-server
 /bin/
 # Test binaries, coverage and profiles
