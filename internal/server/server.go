@@ -48,7 +48,9 @@ type Server struct {
 	Token   string
 	Version string
 	Hub     *events.Hub
-	Shell   port.Shell // nil: native actions return 501
+	Shell   port.Shell   // nil: native actions return 501
+	OpenUI  func() error // shows the manager window
+	Quit    func()       // stops the service
 
 	mu  sync.RWMutex
 	svc *session.Service

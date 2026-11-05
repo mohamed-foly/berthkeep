@@ -15,10 +15,12 @@ import (
 	"github.com/berthkeep/berthkeep/internal/launcher"
 	"github.com/berthkeep/berthkeep/internal/ports"
 	"github.com/berthkeep/berthkeep/internal/session"
+	"github.com/berthkeep/berthkeep/web"
 )
 
 func (s *Server) routes(m *http.ServeMux) {
 	m.HandleFunc("GET /{$}", s.serveIndex)
+	m.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServerFS(web.FS)))
 	m.HandleFunc("GET /api/ping", func(w http.ResponseWriter, _ *http.Request) { writeJSON(w, 200, map[string]string{"ok": "berthkeep"}) })
 	m.HandleFunc("GET /api/state", s.state)
 	m.HandleFunc("GET /api/events", s.events)
@@ -50,6 +52,8 @@ func (s *Server) routes(m *http.ServeMux) {
 	m.HandleFunc("POST /api/trash/empty", s.emptyTrash)
 	m.HandleFunc("POST /api/shell/pick-folder", s.pickFolder)
 	m.HandleFunc("POST /api/shell/reveal", s.reveal)
+	m.HandleFunc("POST /api/ui/open", s.openUI)
+	m.HandleFunc("POST /api/quit", s.quit)
 }
 
 func ctxOf(r *http.Request) (context.Context, context.CancelFunc) {
@@ -632,4 +636,23 @@ func (s *Server) reveal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, 200, map[string]string{"revealed": req.Path})
+}
+
+func (s *Server) openUI(w http.ResponseWriter, _ *http.Request) {
+	if s.OpenUI == nil {
+		writeErr(w, http.StatusNotImplemented, "no UI in this mode; open the address in a browser")
+		return
+	}
+	if err := s.OpenUI(); err != nil {
+		fail(w, err)
+		return
+	}
+	writeJSON(w, 200, map[string]string{"ui": "open"})
+}
+
+func (s *Server) quit(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, 200, map[string]string{"quit": "ok"})
+	if s.Quit != nil {
+		go func() { time.Sleep(100 * time.Millisecond); s.Quit() }()
+	}
 }

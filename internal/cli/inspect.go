@@ -82,9 +82,9 @@ func runDetect(e *Env, args []string) error {
 		return nil
 	}
 	w := tabwriter.NewWriter(e.Out, 0, 4, 2, ' ', 0)
-	fmt.Fprintln(w, "PID\tPORT\tLOCK\tPROFILE")
+	fmt.Fprintln(w, "PID\tPORT\tLOCK\tSESSION\tPROFILE")
 	for _, d := range list {
-		fmt.Fprintf(w, "%d\t%d\t%s\t%s\n", d.PID, d.Port, d.Lock, d.UserDataDir)
+		fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%s\n", d.PID, d.Port, d.Lock, orDash(d.Session), d.UserDataDir)
 	}
 	return w.Flush()
 }

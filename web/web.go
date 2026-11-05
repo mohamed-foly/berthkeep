@@ -5,5 +5,5 @@ import "embed"
 
 // FS holds the UI files.
 //
-//go:embed index.html
+//go:embed index.html app.js styles.css icon.svg
 var FS embed.FS

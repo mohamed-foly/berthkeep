@@ -5,9 +5,168 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="berthkeep-token" content="{{TOKEN}}">
 <title>Berthkeep</title>
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/styles.css">
+<script type="module" src="/assets/app.js"></script>
 </head>
 <body>
-<h1>Berthkeep</h1>
-<p>The UI arrives in M3. The API is live at <code>/api/state</code>.</p>
+<header class="bar">
+  <div class="brand">
+    <img src="/assets/icon.svg" alt="" width="22" height="22">
+    <span>Berthkeep</span>
+  </div>
+  <nav class="views" aria-label="Views">
+    <button class="view on" data-view="sessions" aria-current="page">Sessions</button>
+    <button class="view" data-view="detected">Detected</button>
+    <button class="view" data-view="settings">Settings</button>
+  </nav>
+  <button class="primary" id="new-session" title="New session (n)">New session</button>
+</header>
+
+<main>
+  <section id="view-sessions" class="pane">
+    <div class="tools">
+      <input type="search" id="search" placeholder="Find a session (/)" aria-label="Find a session">
+      <select id="filter-state" aria-label="Show">
+        <option value="">All sessions</option>
+        <option value="running">Running</option>
+        <option value="stopped">Stopped</option>
+      </select>
+      <div id="label-filter" class="chips" aria-label="Labels"></div>
+    </div>
+    <ul id="berths" class="berths" aria-live="polite"></ul>
+    <div id="empty" class="empty" hidden>
+      <p class="empty-title">No sessions yet</p>
+      <p>A session is a browser profile with its own debugging port. Create one, then point your scripts at its endpoint.</p>
+      <button class="primary" data-action="new">Create a session</button>
+    </div>
+  </section>
+
+  <section id="view-detected" class="pane" hidden>
+    <p class="lead">Browsers running with a debugging port. Adopt one to manage its profile and port here.</p>
+    <ul id="detected" class="rows"></ul>
+  </section>
+
+  <section id="view-settings" class="pane" hidden>
+    <form id="settings" class="form">
+      <fieldset>
+        <legend>Ports</legend>
+        <label>Range start <input type="number" name="rangeStart" min="1024" max="65535" required></label>
+        <label>Range end <input type="number" name="rangeEnd" min="1024" max="65535" required></label>
+      </fieldset>
+      <fieldset>
+        <legend>New sessions</legend>
+        <label>Browser <select name="browser"></select></label>
+        <label>Mode
+          <select name="mode"><option value="headed">With a window</option><option value="headless">Headless</option></select>
+        </label>
+        <label>Profile
+          <select name="persistence"><option value="persistent">Keep after stop</option><option value="ephemeral">Wipe on stop</option></select>
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Behaviour</legend>
+        <label>Graceful stop timeout (ms) <input type="number" name="graceMs" min="500" max="60000" required></label>
+        <label class="check"><input type="checkbox" name="skipCaches"> Skip caches when cloning a profile</label>
+      </fieldset>
+      <p class="muted">Data folder: <code id="home-path"></code></p>
+      <div class="actions"><button class="primary" type="submit">Save settings</button></div>
+    </form>
+  </section>
+</main>
+
+<aside id="drawer" class="drawer" hidden aria-label="Session details">
+  <div class="drawer-head">
+    <div>
+      <h2 id="d-title"></h2>
+      <p id="d-sub" class="muted"></p>
+    </div>
+    <button class="icon" data-action="close-drawer" aria-label="Close details">✕</button>
+  </div>
+  <div class="drawer-body">
+    <section>
+      <h3>Endpoint</h3>
+      <div id="d-endpoint" class="endpoint"></div>
+      <div class="snippet-tabs" role="tablist" id="d-snippet-tabs"></div>
+      <pre id="d-snippet" class="code"></pre>
+      <button id="d-copy-snippet" class="quiet">Copy snippet</button>
+    </section>
+    <section>
+      <div class="row-between">
+        <h3>Tabs</h3>
+        <button class="quiet" data-action="refresh-tabs">Refresh</button>
+      </div>
+      <form id="d-open" class="inline">
+        <input type="url" name="url" placeholder="https://example.com" aria-label="URL to open" required>
+        <button>Open tab</button>
+      </form>
+      <ul id="d-tabs" class="tabs"></ul>
+    </section>
+    <section>
+      <h3>Details</h3>
+      <form id="d-edit" class="form">
+        <label>Title <input name="title" required></label>
+        <label>Labels <input name="labels" placeholder="work, staging"></label>
+        <label>Port <input name="port" placeholder="auto" inputmode="numeric"></label>
+        <label>Start URLs <input name="startUrls" placeholder="one per space"></label>
+        <label>Notes <textarea name="notes" rows="2"></textarea></label>
+        <p class="muted">Profile: <code id="d-profile"></code></p>
+        <div class="actions"><button class="primary" type="submit">Save details</button></div>
+      </form>
+    </section>
+    <section>
+      <div class="row-between">
+        <h3>Browser log</h3>
+        <button class="quiet" data-action="refresh-log">Refresh</button>
+      </div>
+      <pre id="d-log" class="code log"></pre>
+    </section>
+    <section class="danger-zone">
+      <h3>Remove</h3>
+      <p class="muted" id="d-remove-hint"></p>
+      <button class="danger" data-action="delete">Delete session</button>
+    </section>
+  </div>
+</aside>
+
+<dialog id="new-dialog">
+  <form method="dialog" id="new-form" class="form">
+    <h2>New session</h2>
+    <label>Title <input name="title" required placeholder="Shop admin"></label>
+    <fieldset class="choice">
+      <legend>Profile</legend>
+      <label><input type="radio" name="persistence" value="persistent" checked> Keep it <small>logins survive restarts</small></label>
+      <label><input type="radio" name="persistence" value="ephemeral"> Clean every start <small>wiped when it stops</small></label>
+      <label><input type="radio" name="persistence" value="temp"> Quick temp <small>removed entirely when it stops</small></label>
+    </fieldset>
+    <fieldset class="choice">
+      <legend>Start from</legend>
+      <label><input type="radio" name="source" value="blank" checked> A blank profile</label>
+      <label><input type="radio" name="source" value="clone"> A copy of <select name="cloneFrom"></select></label>
+      <label><input type="radio" name="source" value="adopt"> An existing folder</label>
+      <div class="inline" id="adopt-row" hidden>
+        <input name="adoptDir" placeholder="Folder path" aria-label="Folder path">
+        <button type="button" id="pick-folder">Browse</button>
+      </div>
+    </fieldset>
+    <div class="grid2">
+      <label>Port <input name="port" placeholder="auto" inputmode="numeric"> <small id="port-hint" class="muted"></small></label>
+      <label>Browser <select name="browser"></select></label>
+      <label>Mode
+        <select name="mode"><option value="headed">With a window</option><option value="headless">Headless</option></select>
+      </label>
+      <label>Labels <input name="labels" placeholder="work, staging"></label>
+    </div>
+    <label>Start URL <input name="url" type="url" placeholder="https://example.com"></label>
+    <label class="check"><input type="checkbox" name="start" checked> Start it now</label>
+    <p id="new-error" class="error" hidden></p>
+    <div class="actions">
+      <button value="cancel" formnovalidate class="quiet">Cancel</button>
+      <button value="ok" class="primary">Create session</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toasts" class="toasts" role="status" aria-live="polite"></div>
 </body>
 </html>

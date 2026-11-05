@@ -67,8 +67,7 @@ func Run(args []string, out, errOut io.Writer) int {
 	}
 	rest := global.Args()
 	if len(rest) == 0 {
-		usage(errOut)
-		return ExitUsage
+		rest = []string{"ui"} // double-click or bare command opens the UI
 	}
 	name := rest[0]
 	cmd, ok := commands[name]

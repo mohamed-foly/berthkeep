@@ -14,6 +14,7 @@ import (
 
 	"github.com/berthkeep/berthkeep/internal/adapters/procs"
 	"github.com/berthkeep/berthkeep/internal/cdp"
+	"github.com/berthkeep/berthkeep/internal/detach"
 	"github.com/berthkeep/berthkeep/internal/paths"
 	"github.com/berthkeep/berthkeep/internal/port"
 	"github.com/berthkeep/berthkeep/internal/ports"
@@ -66,7 +67,7 @@ func (l *Launcher) Start(ctx context.Context, s Spec) (Started, error) {
 			cmd.Stdout, cmd.Stderr = f, f
 		}
 	}
-	detach(cmd, s.Headless)
+	detach.Apply(cmd, s.Headless)
 	if err := cmd.Start(); err != nil {
 		if logFile != nil {
 			logFile.Close()
