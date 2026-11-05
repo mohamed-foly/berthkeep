@@ -1,0 +1,99 @@
+# Berthkeep — .gitignore
+
+# ─── Private / machine-specific (never publish) ──────────────────────────────
+# Portable home: logged-in browser profiles, registry, migration plans,
+# journals, backups. Holds cookies, tokens and private paths.
+data/
+# Pre-implementation research scripts, probes, portable toolchains.
+tmp/
+# Personal notes (e.g. the name declaration).
+notes/
+# The owner's original brief (names machine-specific locations).
+context.md
+# M0 shell spike (throw-away; see HANDOVER §2b).
+spike/
+
+# ─── Go ──────────────────────────────────────────────────────────────────────
+# Compiled binaries and libraries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/berthkeep
+/bkeep
+/berthkeep-server
+/bin/
+# Test binaries, coverage and profiles
+*.test
+*.out
+coverage.*
+*.coverprofile
+*.pprof
+cpu.prof
+mem.prof
+# Local workspace files (per-developer multi-module setups)
+go.work
+go.work.sum
+# vendor/ is not used (modules only); uncomment if that ever changes
+# vendor/
+
+# ─── Wails v3 ────────────────────────────────────────────────────────────────
+# Build output and generated platform files
+/build/bin/
+*.syso
+# Taskfile cache used by the Wails build system
+.task/
+# Generated bindings (the UI talks REST, not bindings; D-27), kept out to be safe
+/web/bindings/
+/frontend/
+
+# ─── Release / signing ───────────────────────────────────────────────────────
+# GoReleaser output
+/dist/
+# Code-signing material must never be committed
+*.pfx
+*.p12
+*.cer
+*.key
+*.pem
+*.snk
+signing/
+
+# ─── Dev-only JS tooling (ESLint/Prettier for web/) ──────────────────────────
+node_modules/
+.eslintcache
+.prettiercache
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─── Tests ───────────────────────────────────────────────────────────────────
+# Temp homes / outputs from integration and acceptance runs
+# (golden files under testdata/ ARE tracked)
+/testdata/**/out/
+/test-results/
+*.golden.actual
+
+# ─── Environment & secrets ───────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Editors / OS ────────────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
