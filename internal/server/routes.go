@@ -11,6 +11,7 @@ import (
 
 	"github.com/mohamed-foly/berthkeep/internal/cdp"
 	"github.com/mohamed-foly/berthkeep/internal/config"
+	"github.com/mohamed-foly/berthkeep/internal/diag"
 	"github.com/mohamed-foly/berthkeep/internal/domain"
 	"github.com/mohamed-foly/berthkeep/internal/launcher"
 	"github.com/mohamed-foly/berthkeep/internal/ports"
@@ -54,6 +55,7 @@ func (s *Server) routes(m *http.ServeMux) {
 	m.HandleFunc("POST /api/shell/reveal", s.reveal)
 	m.HandleFunc("POST /api/ui/open", s.openUI)
 	m.HandleFunc("POST /api/quit", s.quit)
+	m.HandleFunc("POST /api/debug/stacks", s.stacks)
 }
 
 func ctxOf(r *http.Request) (context.Context, context.CancelFunc) {
@@ -648,6 +650,15 @@ func (s *Server) openUI(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	writeJSON(w, 200, map[string]string{"ui": "open"})
+}
+
+func (s *Server) stacks(w http.ResponseWriter, _ *http.Request) {
+	p, err := diag.WriteStacks(s.Home, "manual")
+	if err != nil {
+		writeJSON(w, 500, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, 200, map[string]string{"path": p})
 }
 
 func (s *Server) quit(w http.ResponseWriter, _ *http.Request) {
