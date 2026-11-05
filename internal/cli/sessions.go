@@ -573,3 +573,41 @@ func truncate(s string, n int) string {
 	}
 	return string(r[:n-1]) + "…"
 }
+
+func init() {
+	register("adopt", "register a running debug browser or folder: adopt <port|pid|dir> [--title t]", runAdopt)
+}
+
+func runAdopt(e *Env, args []string) error {
+	fs := newFlags("adopt", e)
+	title := fs.String("title", "", "session title")
+	pos, err := parseInterleaved(fs, args)
+	if err != nil {
+		return errUsage
+	}
+	ref, err := needOne(pos, "<port|pid|dir>")
+	if err != nil {
+		return err
+	}
+	in := session.AdoptInput{Title: *title}
+	if n, err := strconv.Atoi(ref); err == nil {
+		if n >= 1024 && n <= 65535 {
+			in.Port = n
+		}
+		in.PID = n
+	} else {
+		in.Dir = ref
+	}
+	svc, err := service(e)
+	if err != nil {
+		return err
+	}
+	ctx, cancel := ctxTimeout()
+	defer cancel()
+	sess, err := svc.Adopt(ctx, in)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(e.Out, "adopted %s (%s)\n", sess.Slug, sess.ProfileDir)
+	return nil
+}

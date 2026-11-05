@@ -234,3 +234,57 @@ func OpenTab(ctx context.Context, port int, url string) (string, error) {
 	err = c.Call(ctx, "Target.createTarget", map[string]any{"url": url}, &res)
 	return res.TargetID, err
 }
+
+// browserCall runs one command on the browser target.
+func browserCall(ctx context.Context, port int, method string, params, result any) error {
+	v, err := GetVersion(ctx, port)
+	if err != nil {
+		return err
+	}
+	c, err := Dial(ctx, v.WebSocketDebuggerURL)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	return c.Call(ctx, method, params, result)
+}
+
+// CloseTab closes a page target.
+func CloseTab(ctx context.Context, port int, targetID string) error {
+	return browserCall(ctx, port, "Target.closeTarget", map[string]any{"targetId": targetID}, nil)
+}
+
+// ActivateTab brings a page target to the front.
+func ActivateTab(ctx context.Context, port int, targetID string) error {
+	return browserCall(ctx, port, "Target.activateTarget", map[string]any{"targetId": targetID}, nil)
+}
+
+// ErrNoTarget means the page target does not exist.
+var ErrNoTarget = errors.New("target not found")
+
+// Screenshot returns a JPEG of a page target.
+func Screenshot(ctx context.Context, port int, targetID string, quality int) ([]byte, error) {
+	pages, err := Pages(ctx, port)
+	if err != nil {
+		return nil, err
+	}
+	var ws string
+	for _, p := range pages {
+		if p.ID == targetID {
+			ws = p.WebSocketDebuggerURL
+		}
+	}
+	if ws == "" {
+		return nil, ErrNoTarget
+	}
+	c, err := Dial(ctx, ws)
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+	var res struct {
+		Data []byte `json:"data"` // base64 in JSON, decoded by encoding/json
+	}
+	err = c.Call(ctx, "Page.captureScreenshot", map[string]any{"format": "jpeg", "quality": quality}, &res)
+	return res.Data, err
+}

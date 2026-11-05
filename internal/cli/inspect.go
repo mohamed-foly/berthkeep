@@ -9,11 +9,10 @@ import (
 	"time"
 
 	"github.com/berthkeep/berthkeep/internal/adapters/browsers"
-	"github.com/berthkeep/berthkeep/internal/adapters/lock"
-	"github.com/berthkeep/berthkeep/internal/adapters/procs"
 	"github.com/berthkeep/berthkeep/internal/config"
 	"github.com/berthkeep/berthkeep/internal/port"
 	"github.com/berthkeep/berthkeep/internal/ports"
+	"github.com/berthkeep/berthkeep/internal/session"
 )
 
 func init() {
@@ -55,31 +54,12 @@ func runBrowsers(e *Env, args []string) error {
 	return w.Flush()
 }
 
-// Detected is a running debug-enabled browser.
-type Detected struct {
-	PID         int            `json:"pid"`
-	Port        int            `json:"port"`
-	UserDataDir string         `json:"userDataDir"`
-	Exe         string         `json:"exe"`
-	Headless    bool           `json:"headless"`
-	Lock        port.LockState `json:"lock,omitempty"`
-}
-
-func detect(ctx context.Context) ([]Detected, error) {
-	ps, err := procs.New().List(ctx, procs.BrowserExeNames)
+func detect(ctx context.Context, e *Env) ([]session.Detected, error) {
+	svc, err := service(e)
 	if err != nil {
 		return nil, err
 	}
-	probe := lock.New()
-	var out []Detected
-	for _, b := range procs.MainDebugBrowsers(ps) {
-		d := Detected{PID: b.PID, Port: b.Flags.Port, UserDataDir: b.Flags.UserDataDir, Exe: b.Flags.Exe, Headless: b.Flags.Headless}
-		if d.UserDataDir != "" {
-			d.Lock, _ = probe.State(d.UserDataDir)
-		}
-		out = append(out, d)
-	}
-	return out, nil
+	return svc.Detect(ctx)
 }
 
 func runDetect(e *Env, args []string) error {
@@ -90,7 +70,7 @@ func runDetect(e *Env, args []string) error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	list, err := detect(ctx)
+	list, err := detect(ctx, e)
 	if err != nil {
 		return err
 	}
@@ -139,7 +119,7 @@ func runDoctor(e *Env, _ []string) error {
 	fmt.Fprintf(e.Out, "%s ui port     %d %s\n", ok(ports.IsFree(cfg.Server.Port)), cfg.Server.Port, map[bool]string{true: "free", false: "in use (service running?)"}[ports.IsFree(cfg.Server.Port)])
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if d, err := detect(ctx); err == nil {
+	if d, err := detect(ctx, e); err == nil {
 		fmt.Fprintf(e.Out, "%s detected    %d browser(s) with a debugging port\n", ok(true), len(d))
 	}
 	return nil
@@ -148,6 +128,13 @@ func runDoctor(e *Env, _ []string) error {
 func errOr(err error, s string) string {
 	if err != nil {
 		return err.Error()
+	}
+	return s
+}
+
+func orDash(s string) string {
+	if s == "" {
+		return "-"
 	}
 	return s
 }

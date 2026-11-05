@@ -44,3 +44,9 @@ const (
 type LockProbe interface {
 	State(profileDir string) (LockState, error)
 }
+
+// Shell provides native UI actions (dialogs, reveal).
+type Shell interface {
+	PickFolder(ctx context.Context, title string) (string, error)
+	Reveal(path string) error
+}
