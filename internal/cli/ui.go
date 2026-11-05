@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -18,10 +19,16 @@ func init() {
 	register("ui", "open the manager window (starts the service if needed)", runUI)
 	register("gui", "run the service with window and tray in the foreground: gui [--tray]", runGUI)
 	register("quit", "stop the background service (browsers keep running)", runQuit)
+	register("debug", "diagnostics: debug stacks (save the running service's stacks to logs)", runDebug)
 }
 
 // postToService calls a running service; ok is false when none runs.
 func postToService(home, path string) (bool, error) {
+	return postToServiceJSON(home, path, nil)
+}
+
+// postToServiceJSON is postToService that decodes the reply into out.
+func postToServiceJSON(home, path string, out any) (bool, error) {
 	in, alive := server.ReadInfo(home)
 	if !alive {
 		return false, nil
@@ -32,11 +39,32 @@ func postToService(home, path string) (bool, error) {
 	if err != nil {
 		return true, err
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
 	if resp.StatusCode >= 300 {
 		return true, fmt.Errorf("service answered %s", resp.Status)
 	}
+	if out != nil {
+		return true, json.NewDecoder(resp.Body).Decode(out)
+	}
 	return true, nil
+}
+
+func runDebug(e *Env, args []string) error {
+	if len(args) != 1 || args[0] != "stacks" {
+		return errUsage
+	}
+	var r struct {
+		Path string `json:"path"`
+	}
+	ok, err := postToServiceJSON(e.Home, "/api/debug/stacks", &r)
+	if !ok {
+		fmt.Fprintln(e.Out, "no service is running")
+		return nil
+	}
+	if err == nil {
+		fmt.Fprintln(e.Out, "stacks saved to", r.Path)
+	}
+	return err
 }
 
 func runUI(e *Env, _ []string) error {

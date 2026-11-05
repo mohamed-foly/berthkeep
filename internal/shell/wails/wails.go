@@ -12,11 +12,13 @@ import (
 	"runtime/debug"
 	"sort"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	wevents "github.com/wailsapp/wails/v3/pkg/events"
 
+	"github.com/mohamed-foly/berthkeep/internal/diag"
 	"github.com/mohamed-foly/berthkeep/internal/domain"
 	"github.com/mohamed-foly/berthkeep/internal/events"
 	"github.com/mohamed-foly/berthkeep/internal/launcher"
@@ -45,6 +47,9 @@ type Shell struct {
 	tray *application.SystemTray
 	mu   sync.Mutex
 	win  *application.WebviewWindow
+	// opening guards Open against re-entry: WebView2 start-up pumps
+	// messages, so a second tray click runs inside the first Open.
+	opening atomic.Bool
 }
 
 // New creates the Wails app; call Run on the main goroutine.
@@ -80,6 +85,7 @@ func (s *Shell) Run(ctx context.Context) error {
 	s.tray.OnClick(func() { _ = s.Open() })
 	s.rebuildMenu(ctx)
 	go s.followEvents(ctx)
+	go s.watchdog(ctx)
 	go func() {
 		<-ctx.Done()
 		s.app.Quit()
@@ -96,9 +102,45 @@ func (s *Shell) Run(ctx context.Context) error {
 	return err
 }
 
+// watchdog saves stacks once when the UI thread stops answering.
+func (s *Shell) watchdog(ctx context.Context) {
+	const every, limit = 10 * time.Second, 20 * time.Second
+	dumped := false
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(every):
+		}
+		done := make(chan struct{})
+		go application.InvokeSync(func() { close(done) })
+		select {
+		case <-done:
+			dumped = false
+			continue
+		case <-ctx.Done():
+			return
+		case <-time.After(limit):
+		}
+		if !dumped {
+			_, _ = diag.WriteStacks(s.o.Home, "ui-hang")
+			dumped = true
+		}
+		select { // wait for the UI thread before re-arming
+		case <-done:
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
 // Open shows the manager window, creating it if needed.
 func (s *Shell) Open() error {
 	application.InvokeSync(func() {
+		if !s.opening.CompareAndSwap(false, true) {
+			return // already opening on this thread
+		}
+		defer s.opening.Store(false)
 		s.mu.Lock()
 		defer s.mu.Unlock()
 		s.showWindow()
