@@ -11,7 +11,7 @@ notes/
 # The owner's original brief (names machine-specific locations).
 context.md
 # M0 shell spike (throw-away; see HANDOVER §2b).
-spike/
+/spike/
 
 # ─── Go ──────────────────────────────────────────────────────────────────────
 # Compiled binaries and libraries
