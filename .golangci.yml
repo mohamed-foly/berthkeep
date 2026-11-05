@@ -1,0 +1,49 @@
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - depguard
+    - gosec
+    - misspell
+    - revive
+  settings:
+    depguard:
+      rules:
+        wails-only-in-shell:
+          files:
+            - $all
+            - "!**/internal/shell/wails/*.go"
+          deny:
+            - pkg: github.com/wailsapp/wails
+              desc: only internal/shell/wails may import Wails
+    gosec:
+      excludes:
+        - G204 # launching browsers with computed arguments is the job
+        - G304 # reading user-chosen files is the job
+        - G301 # profile folders follow the user's umask
+        - G302
+        - G306
+        - G103 # unsafe is limited to audited Windows API calls
+        - G104 # duplicate of errcheck
+        - G101 # a header name, not a credential
+        - G115 # pid conversions are in range
+        - G118 # long-lived background work owns its context
+        - G703 # paths come from our own data folder
+    staticcheck:
+      checks: ["all", "-QF1003", "-ST1000", "-ST1003"]
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+  exclusions:
+    presets:
+      - std-error-handling
+    rules:
+      - path: _test\.go
+        linters: [errcheck, gosec, bodyclose]
+
+formatters:
+  enable:
+    - gofmt

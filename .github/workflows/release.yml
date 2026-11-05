@@ -1,0 +1,66 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - { runner: windows-latest, os: windows, arch: amd64, variant: gui }
+          - { runner: windows-latest, os: windows, arch: arm64, variant: gui }
+          - { runner: ubuntu-24.04, os: linux, arch: amd64, variant: gui }
+          - { runner: ubuntu-24.04-arm, os: linux, arch: arm64, variant: gui }
+          - { runner: ubuntu-latest, os: linux, arch: amd64, variant: server }
+          - { runner: ubuntu-latest, os: linux, arch: arm64, variant: server }
+          - { runner: macos-latest, os: darwin, arch: arm64, variant: gui }
+          - { runner: macos-latest, os: darwin, arch: amd64, variant: gui } # Apple clang builds amd64 too
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: GUI libraries (Linux)
+        if: matrix.os == 'linux' && matrix.variant == 'gui'
+        run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev pkg-config
+      - name: Build
+        run: go run ./tools/build -os ${{ matrix.os }} -arch ${{ matrix.arch }} -variant ${{ matrix.variant }} -version ${{ github.ref_name }} -out dist
+      # Windows code signing (SignPath Foundation) goes here once the project is approved.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.variant }}
+          path: dist/*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: parts
+      - name: Collect archives and checksums
+        run: |
+          mkdir dist
+          find parts -type f ! -name checksums.txt -exec cp {} dist/ \;
+          cat parts/*/checksums.txt | sort -k2 > dist/checksums.txt
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          {
+            echo "Berthkeep manages the Chromium browsers your scripts and AI agents control over the Chrome DevTools Protocol: one named session per browser, with its own profile and port."
+            echo
+            echo "Download the archive for your system and unzip it. Verify it with \`checksums.txt\`. [Code signing policy](https://github.com/$REPO#code-signing-policy)"
+            echo
+            gh api "repos/$REPO/releases/generate-notes" -f tag_name="$TAG" --jq .body
+          } > notes.md
+          gh release create "$TAG" dist/* --repo "$REPO" --title "$TAG" --notes-file notes.md
