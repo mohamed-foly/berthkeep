@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/events"
-	"github.com/berthkeep/berthkeep/internal/port"
-	"github.com/berthkeep/berthkeep/internal/server"
-	"github.com/berthkeep/berthkeep/internal/session"
-	"github.com/berthkeep/berthkeep/internal/watcher"
+	"github.com/mohamed-foly/berthkeep/internal/events"
+	"github.com/mohamed-foly/berthkeep/internal/port"
+	"github.com/mohamed-foly/berthkeep/internal/server"
+	"github.com/mohamed-foly/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/watcher"
 )
 
 // ServeOptions configure the background service.

@@ -20,11 +20,11 @@ jobs:
           - { runner: ubuntu-latest, os: linux, arch: amd64, variant: server }
           - { runner: ubuntu-latest, os: linux, arch: arm64, variant: server }
           - { runner: macos-latest, os: darwin, arch: arm64, variant: gui }
-          - { runner: macos-13, os: darwin, arch: amd64, variant: gui }
+          - { runner: macos-latest, os: darwin, arch: amd64, variant: gui } # Apple clang builds amd64 too
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: GUI libraries (Linux)
@@ -33,7 +33,7 @@ jobs:
       - name: Build
         run: go run ./tools/build -os ${{ matrix.os }} -arch ${{ matrix.arch }} -variant ${{ matrix.variant }} -version ${{ github.ref_name }} -out dist
       # Windows code signing (SignPath Foundation) goes here once the project is approved.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.variant }}
           path: dist/*
@@ -42,7 +42,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: parts
       - name: Collect archives and checksums
@@ -53,4 +53,14 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" dist/* --repo "${{ github.repository }}" --title "${{ github.ref_name }}" --generate-notes
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          {
+            echo "Berthkeep manages the Chromium browsers your scripts and AI agents control over the Chrome DevTools Protocol: one named session per browser, with its own profile and port."
+            echo
+            echo "Download the archive for your system and unzip it. Verify it with \`checksums.txt\`. [Code signing policy](https://github.com/$REPO#code-signing-policy)"
+            echo
+            gh api "repos/$REPO/releases/generate-notes" -f tag_name="$TAG" --jq .body
+          } > notes.md
+          gh release create "$TAG" dist/* --repo "$REPO" --title "$TAG" --notes-file notes.md

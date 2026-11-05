@@ -13,15 +13,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/adapters/browsers"
-	"github.com/berthkeep/berthkeep/internal/adapters/lock"
-	"github.com/berthkeep/berthkeep/internal/adapters/procs"
-	"github.com/berthkeep/berthkeep/internal/cdp"
-	"github.com/berthkeep/berthkeep/internal/config"
-	"github.com/berthkeep/berthkeep/internal/domain"
-	"github.com/berthkeep/berthkeep/internal/launcher"
-	"github.com/berthkeep/berthkeep/internal/ports"
-	"github.com/berthkeep/berthkeep/internal/registry"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/browsers"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/lock"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/procs"
+	"github.com/mohamed-foly/berthkeep/internal/cdp"
+	"github.com/mohamed-foly/berthkeep/internal/config"
+	"github.com/mohamed-foly/berthkeep/internal/domain"
+	"github.com/mohamed-foly/berthkeep/internal/launcher"
+	"github.com/mohamed-foly/berthkeep/internal/ports"
+	"github.com/mohamed-foly/berthkeep/internal/registry"
 )
 
 // newSvc uses a temp home and high ports.

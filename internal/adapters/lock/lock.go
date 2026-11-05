@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/berthkeep/berthkeep/internal/port"
+	"github.com/mohamed-foly/berthkeep/internal/port"
 )
 
 // Probe is the LockProbe for the current OS.

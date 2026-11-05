@@ -2,14 +2,14 @@
 package app
 
 import (
-	"github.com/berthkeep/berthkeep/internal/adapters/browsers"
-	"github.com/berthkeep/berthkeep/internal/adapters/lock"
-	"github.com/berthkeep/berthkeep/internal/adapters/procs"
-	"github.com/berthkeep/berthkeep/internal/config"
-	"github.com/berthkeep/berthkeep/internal/launcher"
-	"github.com/berthkeep/berthkeep/internal/port"
-	"github.com/berthkeep/berthkeep/internal/registry"
-	"github.com/berthkeep/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/browsers"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/lock"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/procs"
+	"github.com/mohamed-foly/berthkeep/internal/config"
+	"github.com/mohamed-foly/berthkeep/internal/launcher"
+	"github.com/mohamed-foly/berthkeep/internal/port"
+	"github.com/mohamed-foly/berthkeep/internal/registry"
+	"github.com/mohamed-foly/berthkeep/internal/session"
 )
 
 // NewSessionService wires the session Facade for home.

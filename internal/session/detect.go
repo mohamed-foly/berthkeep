@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/berthkeep/berthkeep/internal/adapters/procs"
-	"github.com/berthkeep/berthkeep/internal/domain"
-	"github.com/berthkeep/berthkeep/internal/paths"
-	"github.com/berthkeep/berthkeep/internal/port"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/procs"
+	"github.com/mohamed-foly/berthkeep/internal/domain"
+	"github.com/mohamed-foly/berthkeep/internal/paths"
+	"github.com/mohamed-foly/berthkeep/internal/port"
 )
 
 // Detected is a running browser that exposes a debugging port.

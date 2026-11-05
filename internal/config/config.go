@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/berthkeep/berthkeep/internal/fsutil"
+	"github.com/mohamed-foly/berthkeep/internal/fsutil"
 )
 
 // FileName is the config file inside the home directory.

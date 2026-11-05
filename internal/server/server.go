@@ -18,12 +18,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/domain"
-	"github.com/berthkeep/berthkeep/internal/events"
-	"github.com/berthkeep/berthkeep/internal/fsutil"
-	"github.com/berthkeep/berthkeep/internal/port"
-	"github.com/berthkeep/berthkeep/internal/session"
-	"github.com/berthkeep/berthkeep/web"
+	"github.com/mohamed-foly/berthkeep/internal/domain"
+	"github.com/mohamed-foly/berthkeep/internal/events"
+	"github.com/mohamed-foly/berthkeep/internal/fsutil"
+	"github.com/mohamed-foly/berthkeep/internal/port"
+	"github.com/mohamed-foly/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/web"
 )
 
 // InfoFile is written to the home while the service runs.

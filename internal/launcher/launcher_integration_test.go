@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/adapters/browsers"
-	"github.com/berthkeep/berthkeep/internal/adapters/lock"
-	"github.com/berthkeep/berthkeep/internal/adapters/procs"
-	"github.com/berthkeep/berthkeep/internal/cdp"
-	"github.com/berthkeep/berthkeep/internal/port"
-	"github.com/berthkeep/berthkeep/internal/ports"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/browsers"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/lock"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/procs"
+	"github.com/mohamed-foly/berthkeep/internal/cdp"
+	"github.com/mohamed-foly/berthkeep/internal/port"
+	"github.com/mohamed-foly/berthkeep/internal/ports"
 )
 
 // Real-browser tests: temp profiles, ports 19300-19349 only.

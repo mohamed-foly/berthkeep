@@ -10,10 +10,10 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/app"
-	"github.com/berthkeep/berthkeep/internal/cdp"
-	"github.com/berthkeep/berthkeep/internal/domain"
-	"github.com/berthkeep/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/app"
+	"github.com/mohamed-foly/berthkeep/internal/cdp"
+	"github.com/mohamed-foly/berthkeep/internal/domain"
+	"github.com/mohamed-foly/berthkeep/internal/session"
 )
 
 func init() {

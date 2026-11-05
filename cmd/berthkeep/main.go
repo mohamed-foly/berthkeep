@@ -4,7 +4,7 @@ package main
 import (
 	"os"
 
-	"github.com/berthkeep/berthkeep/internal/cli"
+	"github.com/mohamed-foly/berthkeep/internal/cli"
 )
 
 func main() {

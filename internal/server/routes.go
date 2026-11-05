@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/cdp"
-	"github.com/berthkeep/berthkeep/internal/config"
-	"github.com/berthkeep/berthkeep/internal/domain"
-	"github.com/berthkeep/berthkeep/internal/launcher"
-	"github.com/berthkeep/berthkeep/internal/ports"
-	"github.com/berthkeep/berthkeep/internal/session"
-	"github.com/berthkeep/berthkeep/web"
+	"github.com/mohamed-foly/berthkeep/internal/cdp"
+	"github.com/mohamed-foly/berthkeep/internal/config"
+	"github.com/mohamed-foly/berthkeep/internal/domain"
+	"github.com/mohamed-foly/berthkeep/internal/launcher"
+	"github.com/mohamed-foly/berthkeep/internal/ports"
+	"github.com/mohamed-foly/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/web"
 )
 
 func (s *Server) routes(m *http.ServeMux) {

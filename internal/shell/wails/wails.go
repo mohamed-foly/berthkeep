@@ -17,12 +17,12 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	wevents "github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/berthkeep/berthkeep/internal/domain"
-	"github.com/berthkeep/berthkeep/internal/events"
-	"github.com/berthkeep/berthkeep/internal/launcher"
-	"github.com/berthkeep/berthkeep/internal/session"
-	"github.com/berthkeep/berthkeep/internal/shell"
-	"github.com/berthkeep/berthkeep/internal/shell/browser"
+	"github.com/mohamed-foly/berthkeep/internal/domain"
+	"github.com/mohamed-foly/berthkeep/internal/events"
+	"github.com/mohamed-foly/berthkeep/internal/launcher"
+	"github.com/mohamed-foly/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/shell"
+	"github.com/mohamed-foly/berthkeep/internal/shell/browser"
 )
 
 // Available reports whether this build has the native shell.
@@ -54,6 +54,7 @@ func New(o Options) *Shell {
 	s.app = application.New(application.Options{
 		Name:        "Berthkeep",
 		Description: "Chromium CDP session manager",
+		Icon:        shell.PNG(256, false),
 		Windows: application.WindowsOptions{
 			DisableQuitOnLastWindowClosed: true,
 			WebviewUserDataPath:           filepath.Join(o.Home, "ui-webview"),

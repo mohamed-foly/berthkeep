@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/events"
-	"github.com/berthkeep/berthkeep/internal/launcher"
-	"github.com/berthkeep/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/events"
+	"github.com/mohamed-foly/berthkeep/internal/launcher"
+	"github.com/mohamed-foly/berthkeep/internal/session"
 )
 
 // StatusEvent is published when a session's state changes.

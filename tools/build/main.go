@@ -9,17 +9,23 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
+	"image"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/tc-hib/winres"
+	"github.com/tc-hib/winres/version"
+
+	"github.com/mohamed-foly/berthkeep/internal/shell"
 )
 
 type binary struct {
-	name, pkg, tags, ldExtra string
-	cgo                      bool
+	name, pkg, tags, ldExtra, desc string
+	cgo                            bool
 }
 
 func main() {
@@ -40,8 +46,8 @@ func plan(goos, variant string) []binary {
 	switch {
 	case goos == "windows":
 		return []binary{
-			{name: "berthkeep.exe", pkg: "./cmd/berthkeep"},
-			{name: "berthkeepw.exe", pkg: "./cmd/berthkeepw", ldExtra: " -H=windowsgui"},
+			{name: "berthkeep.exe", pkg: "./cmd/berthkeep", desc: "Berthkeep command line"},
+			{name: "berthkeepw.exe", pkg: "./cmd/berthkeepw", ldExtra: " -H=windowsgui", desc: "Berthkeep"},
 		}
 	case variant == "server":
 		return []binary{{name: "berthkeep", pkg: "./cmd/berthkeep", tags: "server"}}
@@ -58,6 +64,13 @@ func run(goos, arch, version, out, variant string, budgetMB float64) error {
 	var files []string
 	for _, b := range plan(goos, variant) {
 		dst := filepath.Join(stage, b.name)
+		if goos == "windows" {
+			syso, err := writeResources(b, arch, version)
+			if err != nil {
+				return fmt.Errorf("%s resources: %w", b.name, err)
+			}
+			defer os.Remove(syso)
+		}
 		args := []string{"build", "-trimpath", "-ldflags", "-s -w -X main.version=" + version + b.ldExtra, "-o", dst}
 		if b.tags != "" {
 			args = append(args, "-tags", b.tags)
@@ -104,6 +117,58 @@ func run(goos, arch, version, out, variant string, budgetMB float64) error {
 		return err
 	}
 	return appendChecksum(filepath.Join(out, "checksums.txt"), archive)
+}
+
+// writeResources embeds icon and file details (product name, version) in a Windows exe.
+func writeResources(b binary, arch, ver string) (string, error) {
+	icon, err := winres.NewIconFromImages([]image.Image{
+		shell.Mark(256, false), shell.Mark(64, false), shell.Mark(48, false),
+		shell.Mark(32, false), shell.Mark(16, false),
+	})
+	if err != nil {
+		return "", err
+	}
+	rs := &winres.ResourceSet{}
+	if err := rs.SetIcon(winres.Name("APP"), icon); err != nil {
+		return "", err
+	}
+	num := numericVersion(ver)
+	vi := version.Info{}
+	for k, v := range map[string]string{
+		version.ProductName:      "Berthkeep",
+		version.FileDescription:  b.desc,
+		version.OriginalFilename: b.name,
+		version.InternalName:     strings.TrimSuffix(b.name, ".exe"),
+		version.LegalCopyright:   "Berthkeep contributors, MIT License",
+	} {
+		if err := vi.Set(version.LangDefault, k, v); err != nil {
+			return "", err
+		}
+	}
+	vi.SetFileVersion(num)
+	vi.SetProductVersion(num)
+	rs.SetVersionInfo(vi)
+	p := filepath.Join(b.pkg, "rsrc_windows_"+arch+".syso")
+	f, err := os.Create(p)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	return p, rs.WriteObject(f, winres.Arch(arch))
+}
+
+// numericVersion turns v1.2.3[-x] into 1.2.3.0; anything else is 0.0.0.0.
+func numericVersion(v string) string {
+	parts := strings.SplitN(strings.SplitN(strings.TrimPrefix(v, "v"), "-", 2)[0], ".", 3)
+	if len(parts) != 3 {
+		return "0.0.0.0"
+	}
+	for _, p := range parts {
+		if p == "" || strings.Trim(p, "0123456789") != "" {
+			return "0.0.0.0"
+		}
+	}
+	return strings.Join(parts, ".") + ".0"
 }
 
 func zipFiles(dst string, files []string) (string, error) {

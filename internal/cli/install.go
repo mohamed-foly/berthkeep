@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/berthkeep/berthkeep/internal/install"
+	"github.com/mohamed-foly/berthkeep/internal/install"
 )
 
 func init() {

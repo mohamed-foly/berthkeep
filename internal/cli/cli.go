@@ -9,9 +9,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/berthkeep/berthkeep/internal/domain"
-	"github.com/berthkeep/berthkeep/internal/paths"
-	"github.com/berthkeep/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/domain"
+	"github.com/mohamed-foly/berthkeep/internal/paths"
+	"github.com/mohamed-foly/berthkeep/internal/session"
 )
 
 // Version is injected by main.

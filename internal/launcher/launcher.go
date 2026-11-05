@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/adapters/procs"
-	"github.com/berthkeep/berthkeep/internal/cdp"
-	"github.com/berthkeep/berthkeep/internal/detach"
-	"github.com/berthkeep/berthkeep/internal/paths"
-	"github.com/berthkeep/berthkeep/internal/port"
-	"github.com/berthkeep/berthkeep/internal/ports"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/procs"
+	"github.com/mohamed-foly/berthkeep/internal/cdp"
+	"github.com/mohamed-foly/berthkeep/internal/detach"
+	"github.com/mohamed-foly/berthkeep/internal/paths"
+	"github.com/mohamed-foly/berthkeep/internal/port"
+	"github.com/mohamed-foly/berthkeep/internal/ports"
 )
 
 // ErrExited means the browser exited before its debugging endpoint came up.

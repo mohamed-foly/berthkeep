@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/berthkeep/berthkeep/internal/port"
+	"github.com/mohamed-foly/berthkeep/internal/port"
 )
 
 // Candidate is a possible browser install.

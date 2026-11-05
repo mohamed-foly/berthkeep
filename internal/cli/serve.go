@@ -6,8 +6,8 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/berthkeep/berthkeep/internal/app"
-	"github.com/berthkeep/berthkeep/internal/server"
+	"github.com/mohamed-foly/berthkeep/internal/app"
+	"github.com/mohamed-foly/berthkeep/internal/server"
 )
 
 func init() {

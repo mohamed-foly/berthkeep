@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/domain"
-	"github.com/berthkeep/berthkeep/internal/fsutil"
-	"github.com/berthkeep/berthkeep/internal/paths"
+	"github.com/mohamed-foly/berthkeep/internal/domain"
+	"github.com/mohamed-foly/berthkeep/internal/fsutil"
+	"github.com/mohamed-foly/berthkeep/internal/paths"
 )
 
 const (

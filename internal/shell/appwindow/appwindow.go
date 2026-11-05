@@ -5,9 +5,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/berthkeep/berthkeep/internal/adapters/browsers"
-	"github.com/berthkeep/berthkeep/internal/port"
-	"github.com/berthkeep/berthkeep/internal/shell"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/browsers"
+	"github.com/mohamed-foly/berthkeep/internal/port"
+	"github.com/mohamed-foly/berthkeep/internal/shell"
 )
 
 // UI opens URL with --app in its own small profile.

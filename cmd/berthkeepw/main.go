@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/cli"
-	"github.com/berthkeep/berthkeep/internal/paths"
+	"github.com/mohamed-foly/berthkeep/internal/cli"
+	"github.com/mohamed-foly/berthkeep/internal/paths"
 )
 
 // version is set at build time with -ldflags "-X main.version=…".

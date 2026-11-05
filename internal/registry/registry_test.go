@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/berthkeep/berthkeep/internal/domain"
+	"github.com/mohamed-foly/berthkeep/internal/domain"
 )
 
 func newStore(t *testing.T) *Store {

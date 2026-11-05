@@ -11,14 +11,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/berthkeep/berthkeep/internal/adapters/browsers"
-	"github.com/berthkeep/berthkeep/internal/adapters/lock"
-	"github.com/berthkeep/berthkeep/internal/adapters/procs"
-	"github.com/berthkeep/berthkeep/internal/config"
-	"github.com/berthkeep/berthkeep/internal/events"
-	"github.com/berthkeep/berthkeep/internal/launcher"
-	"github.com/berthkeep/berthkeep/internal/registry"
-	"github.com/berthkeep/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/browsers"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/lock"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/procs"
+	"github.com/mohamed-foly/berthkeep/internal/config"
+	"github.com/mohamed-foly/berthkeep/internal/events"
+	"github.com/mohamed-foly/berthkeep/internal/launcher"
+	"github.com/mohamed-foly/berthkeep/internal/registry"
+	"github.com/mohamed-foly/berthkeep/internal/session"
 )
 
 // testServer runs the handler on a real loopback listener so Host checks apply.

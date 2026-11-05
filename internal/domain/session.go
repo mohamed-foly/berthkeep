@@ -31,10 +31,9 @@ const (
 type OriginType string
 
 const (
-	OriginCreated  OriginType = "created"
-	OriginCloned   OriginType = "cloned"
-	OriginAdopted  OriginType = "adopted"
-	OriginMigrated OriginType = "migrated"
+	OriginCreated OriginType = "created"
+	OriginCloned  OriginType = "cloned"
+	OriginAdopted OriginType = "adopted"
 )
 
 // Origin is the provenance of a session.
@@ -42,12 +41,6 @@ type Origin struct {
 	Type OriginType `json:"type"`
 	From string     `json:"from,omitempty"`
 	At   time.Time  `json:"at"`
-}
-
-// Aliases are former locations and ports (migration provenance).
-type Aliases struct {
-	Paths []string `json:"paths,omitempty"`
-	Ports []int    `json:"ports,omitempty"`
 }
 
 // Window is the requested window size.
@@ -91,7 +84,6 @@ type Session struct {
 	ExtraArgs         []string          `json:"extraArgs,omitempty"`
 	Env               map[string]string `json:"env,omitempty"`
 	Origin            Origin            `json:"origin"`
-	Aliases           Aliases           `json:"aliases"`
 	CreatedAt         time.Time         `json:"createdAt"`
 	UpdatedAt         time.Time         `json:"updatedAt"`
 	LastStartedAt     *time.Time        `json:"lastStartedAt,omitempty"`

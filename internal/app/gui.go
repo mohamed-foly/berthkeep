@@ -9,13 +9,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/adapters/browsers"
-	"github.com/berthkeep/berthkeep/internal/server"
-	"github.com/berthkeep/berthkeep/internal/session"
-	"github.com/berthkeep/berthkeep/internal/shell"
-	"github.com/berthkeep/berthkeep/internal/shell/appwindow"
-	"github.com/berthkeep/berthkeep/internal/shell/browser"
-	"github.com/berthkeep/berthkeep/internal/shell/wails"
+	"github.com/mohamed-foly/berthkeep/internal/adapters/browsers"
+	"github.com/mohamed-foly/berthkeep/internal/server"
+	"github.com/mohamed-foly/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/shell"
+	"github.com/mohamed-foly/berthkeep/internal/shell/appwindow"
+	"github.com/mohamed-foly/berthkeep/internal/shell/browser"
+	"github.com/mohamed-foly/berthkeep/internal/shell/wails"
 )
 
 // EnvShell forces a shell: wails, appwindow or browser.

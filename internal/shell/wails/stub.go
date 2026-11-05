@@ -6,9 +6,9 @@ package wails
 import (
 	"context"
 
-	"github.com/berthkeep/berthkeep/internal/events"
-	"github.com/berthkeep/berthkeep/internal/session"
-	"github.com/berthkeep/berthkeep/internal/shell"
+	"github.com/mohamed-foly/berthkeep/internal/events"
+	"github.com/mohamed-foly/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/shell"
 )
 
 // Available reports whether this build has the native shell.

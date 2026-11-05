@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/session"
-	"github.com/berthkeep/berthkeep/internal/watcher"
+	"github.com/mohamed-foly/berthkeep/internal/session"
+	"github.com/mohamed-foly/berthkeep/internal/watcher"
 )
 
 func TestStartTabsScreenshotAndWatcher(t *testing.T) {

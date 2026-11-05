@@ -9,9 +9,9 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/berthkeep/berthkeep/internal/app"
-	"github.com/berthkeep/berthkeep/internal/detach"
-	"github.com/berthkeep/berthkeep/internal/server"
+	"github.com/mohamed-foly/berthkeep/internal/app"
+	"github.com/mohamed-foly/berthkeep/internal/detach"
+	"github.com/mohamed-foly/berthkeep/internal/server"
 )
 
 func init() {

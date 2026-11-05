@@ -121,7 +121,7 @@ this folder.**
 
 ## Build from source
 
-Requires Go 1.26 or newer.
+Requires Go 1.27 or newer.
 
 ```
 go test ./...                                   # unit tests
@@ -132,6 +132,21 @@ go run ./tools/build -os linux -variant server  # headless build without GUI lib
 
 Windows builds need no C compiler. The macOS and Linux desktop builds use cgo
 and must be built on those systems.
+
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io/),
+certificate by [SignPath Foundation](https://signpath.org/).
+
+Windows releases are built from this repository by GitHub Actions, and each
+release is signed only after a maintainer approves it.
+
+| Role | Members |
+|---|---|
+| Committers and reviewers | [mohamed-foly](https://github.com/mohamed-foly) |
+| Approvers | [mohamed-foly](https://github.com/mohamed-foly) |
+
+Changes from outside contributors are reviewed by a committer before they are merged.
 
 ## License
 
